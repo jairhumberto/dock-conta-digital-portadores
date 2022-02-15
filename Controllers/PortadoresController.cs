@@ -24,10 +24,15 @@ namespace PortadoresService.Controllers
         {
             var portador = _mapper.Map<Portador>(portadorCreateDto);
 
-            _repository.CreatePortador(portador);
-            _repository.SaveChanges();
+            if (_repository.GetPortadorByCpf(portador.Cpf) == null)
+            {
+                _repository.CreatePortador(portador);
+                _repository.SaveChanges();
 
-            return CreatedAtRoute(nameof(GetPortadorByCpf), new { Cpf = portador.Cpf }, _mapper.Map<PortadorReadDto>(portador));
+                return CreatedAtRoute(nameof(GetPortadorByCpf), new { Cpf = portador.Cpf }, _mapper.Map<PortadorReadDto>(portador));
+            }
+
+            return Conflict("Já existe um portador com o Cpf informado");
         }
 
         [HttpDelete("{cpf}")]
