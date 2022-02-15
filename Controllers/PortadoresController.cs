@@ -40,7 +40,7 @@ namespace PortadoresService.Controllers
                 _repository.DeletePortador(portador);
                 _repository.SaveChanges();
 
-                return Ok(_mapper.Map<PortadorReadDto>(portador));
+                return NoContent();
             }
 
             return NotFound();
