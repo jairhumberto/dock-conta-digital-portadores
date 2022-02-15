@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using PortadoresService.DataAnnotations;
 
 namespace PortadoresService.Dtos
 {
@@ -7,6 +8,7 @@ namespace PortadoresService.Dtos
         [Required]
         public string Nome { get; set; }
         
+        [Cpf]
         [Required]
         public string Cpf { get; set; }
     }
