@@ -12,6 +12,7 @@ namespace PortadoresService.Profiles
             CreateMap<Portador, PortadorReadDto>();
             CreateMap<PortadorCreateDto, Portador>().AfterMap((o,n) => {
                 n.Cpf = Regex.Replace(o.Cpf, "[^0-9]", "");
+                n.DataCadastro = DateTime.Now;
             });
         }
     }
