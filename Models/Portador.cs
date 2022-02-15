@@ -4,8 +4,7 @@ namespace PortadoresService.Models
 {
     public class Portador
     {
-        [Key]
-        [Required]
+        [Key, Required]
         public int Id { get; set; }
         
         [Required]

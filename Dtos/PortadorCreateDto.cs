@@ -8,8 +8,7 @@ namespace PortadoresService.Dtos
         [Required]
         public string Nome { get; set; }
         
-        [Cpf]
-        [Required]
+        [Cpf, Required]
         public string Cpf { get; set; }
     }
 }
