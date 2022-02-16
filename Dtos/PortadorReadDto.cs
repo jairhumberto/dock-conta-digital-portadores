@@ -4,6 +4,5 @@ namespace PortadoresService.Dtos
     {
         public string Nome { get; set; }
         public string Cpf { get; set; }
-        public DateTime DataCadastro { get; set; }
     }
 }
