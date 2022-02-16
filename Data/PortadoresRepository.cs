@@ -38,7 +38,7 @@ namespace PortadoresService.Data
 
         public IEnumerable<Portador> GetPortadores()
         {
-            return _context.Portadores.ToList();
+            return _context.Portadores;
         }
 
         public void SaveChanges()

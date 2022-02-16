@@ -24,31 +24,31 @@ namespace PortadoresService.Controllers
         {
             var portador = _mapper.Map<Portador>(portadorCreateDto);
 
-            if (_repository.GetPortadorByCpf(portador.Cpf) == null)
+            if (_repository.GetPortadorByCpf(portador.Cpf) != null)
             {
-                _repository.CreatePortador(portador);
-                _repository.SaveChanges();
-
-                return CreatedAtRoute(nameof(GetPortadorByCpf), new { Cpf = portador.Cpf }, _mapper.Map<PortadorReadDto>(portador));
+                return Conflict("Já existe um portador com o Cpf informado");
             }
 
-            return Conflict("Já existe um portador com o Cpf informado");
+            _repository.CreatePortador(portador);
+            _repository.SaveChanges();
+
+            return CreatedAtRoute(nameof(GetPortadorByCpf), new { Cpf = portador.Cpf }, _mapper.Map<PortadorReadDto>(portador));
         }
 
         [HttpDelete("{cpf}")]
-        public ActionResult<PortadorReadDto> DeletePortadorByCpf(string cpf)
+        public ActionResult DeletePortadorByCpf(string cpf)
         {
             var portador = _repository.GetPortadorByCpf(cpf);
 
-            if (portador != null)
+            if (portador == null)
             {
-                _repository.DeletePortador(portador);
-                _repository.SaveChanges();
-
-                return NoContent();
+                return NotFound();
             }
 
-            return NotFound();
+            _repository.DeletePortador(portador);
+            _repository.SaveChanges();
+
+            return NoContent();
         }
 
         [HttpGet("{cpf}", Name="GetPortadorByCpf")]
@@ -56,12 +56,12 @@ namespace PortadoresService.Controllers
         {
             var portador = _repository.GetPortadorByCpf(cpf);
 
-            if (portador != null)
+            if (portador == null)
             {
-                return Ok(_mapper.Map<PortadorReadDto>(portador));
+                return NotFound();
             }
 
-            return NotFound();
+            return Ok(_mapper.Map<PortadorReadDto>(portador));
         }
 
         [HttpGet]
