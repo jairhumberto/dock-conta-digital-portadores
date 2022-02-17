@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using PortadoresService.Data;
 using PortadoresService.Dtos;
 using PortadoresService.Models;
+using PortadoresService.SyncDataServices.Http;
 
 namespace PortadoresService.Controllers
 {
@@ -12,27 +13,33 @@ namespace PortadoresService.Controllers
     {
         private readonly IPortadoresRepository _repository;
         private readonly IMapper _mapper;
+        private readonly IContaDataClient _contaDataClient;
 
-        public PortadoresController(IPortadoresRepository repository, IMapper mapper)
+        public PortadoresController(IPortadoresRepository repository, IMapper mapper,
+                IContaDataClient contaDataClient)
         {
             _repository = repository;
             _mapper = mapper;
+            _contaDataClient = contaDataClient;
         }
 
         [HttpPost]
-        public ActionResult<PortadorReadDto> CreatePortador(PortadorCreateDto portadorCreateDto)
+        public async Task<ActionResult<PortadorReadDto>> CreatePortador(PortadorCreateDto portadorCreateDto)
         {
-            var portador = _mapper.Map<Portador>(portadorCreateDto);
+            var portadorModel = _mapper.Map<Portador>(portadorCreateDto);
 
-            if (_repository.GetPortadorByCpf(portador.Cpf) != null)
+            if (_repository.GetPortadorByCpf(portadorModel.Cpf) != null)
             {
-                return Conflict("Já existe um portador com o Cpf informado");
+                return Conflict("Ja existe portador com o cpf informado");
             }
 
-            _repository.CreatePortador(portador);
+            _repository.CreatePortador(portadorModel);
             _repository.SaveChanges();
 
-            return CreatedAtRoute(nameof(GetPortadorByCpf), new { Cpf = portador.Cpf }, _mapper.Map<PortadorReadDto>(portador));
+            var portadorReadDto = _mapper.Map<PortadorReadDto>(portadorModel);
+            await _contaDataClient.SendPortadorToConta(portadorReadDto);
+
+            return CreatedAtRoute(nameof(GetPortadorByCpf), new { Cpf = portadorModel.Cpf }, _mapper.Map<PortadorReadDto>(portadorModel));
         }
 
         [HttpDelete("{cpf}")]
