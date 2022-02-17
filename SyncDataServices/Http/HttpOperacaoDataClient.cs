@@ -29,5 +29,15 @@ namespace PortadoresService.SyncDataServices.Http
                 throw new HttpSyncException();
             }
         }
+
+        public async Task DeletePortadorFromConta(PortadorReadDto portadorReadDto)
+        {
+            var response = await _httpClient.DeleteAsync($"{_configuration["ContasService"]}/{portadorReadDto.Cpf}");
+
+            if(!response.IsSuccessStatusCode)
+            {
+                throw new HttpSyncException();
+            }
+        }
     }
 }

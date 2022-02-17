@@ -43,16 +43,19 @@ namespace PortadoresService.Controllers
         }
 
         [HttpDelete("{cpf}")]
-        public ActionResult DeletePortadorByCpf(string cpf)
+        public async Task<ActionResult> DeletePortadorByCpf(string cpf)
         {
-            var portador = _repository.GetPortadorByCpf(cpf);
+            var portadorModel = _repository.GetPortadorByCpf(cpf);
 
-            if (portador == null)
+            if (portadorModel == null)
             {
                 return NotFound();
             }
 
-            _repository.DeletePortador(portador);
+            var portadorReadDto = _mapper.Map<PortadorReadDto>(portadorModel);
+            await _contaDataClient.DeletePortadorFromConta(portadorReadDto);
+
+            _repository.DeletePortador(portadorModel);
             _repository.SaveChanges();
 
             return NoContent();
