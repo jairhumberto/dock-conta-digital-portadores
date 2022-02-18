@@ -12,8 +12,5 @@ namespace PortadoresService.Models
         
         [Required]
         public string Cpf { get; set; }
-
-        [Required]
-        public DateTime DataCadastro { get; set; }
     }
 }

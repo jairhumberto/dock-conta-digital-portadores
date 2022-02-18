@@ -7,7 +7,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(opt => opt.UseInMemoryDatabase("InMemory"));
 builder.Services.AddScoped<IPortadoresRepository, PortadoresRepository>();
 
-builder.Services.AddHttpClient<IContaDataClient, HttpContaDataClient>();
+builder.Services.AddHttpClient<IContasServiceClient, HttpContasServiceClient>();
 builder.Services.AddControllers();
 
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());

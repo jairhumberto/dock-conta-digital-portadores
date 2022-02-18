@@ -4,7 +4,8 @@ using System.Text.RegularExpressions;
 
 namespace PortadoresService.DataAnnotations
 {
-    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter, AllowMultiple = false)]
+    [AttributeUsage(AttributeTargets.Property | AttributeTargets.Field | AttributeTargets.Parameter,
+            AllowMultiple = false)]
     public class CpfAttribute : ValidationAttribute
     {
         protected override ValidationResult? IsValid(object? value, ValidationContext validationContext)
@@ -14,7 +15,7 @@ namespace PortadoresService.DataAnnotations
                 return new ValidationResult(ErrorMessage);
             }
 
-            var cpf = Regex.Replace((string) value, "[^0-9]", "");
+            var cpf = Regex.Replace((string)value, "[^0-9]", "");
 
             if (cpf.Length != 11 || !ValidaCpf(cpf))
             {
@@ -26,20 +27,21 @@ namespace PortadoresService.DataAnnotations
 
         private bool ValidaCpf(string cpf)
         {
-            int soma1=0, soma2=0;
+            return Mod11(cpf.Substring(0, 9)) == cpf[9].ToString() && Mod11(cpf.Substring(0, 10)) == cpf[10].ToString();
+        }
 
-            for (var i=0; i<10; i++)
+        private string Mod11(string m)
+        {
+            var soma = 0;
+
+            for (var i = 0; i < m.Length; i++)
             {
-                int c = cpf[i]-'0';
-                
-                if (i<9) soma1 += c*(10-i);
-                soma2 += c*(11-i);
+                soma += (m[i] - '0') * (m.Length + 1 - i);
             }
-            
-            int c10 = cpf[9]-'0';
-            int c11 = cpf[10]-'0';
-            
-            return ((soma1*10)%11)==c10 && ((soma2*10)%11)==c11;
+
+            int resto = soma % 11;
+
+            return (resto < 2 ? 0 : 11 - resto).ToString();
         }
     }
 }

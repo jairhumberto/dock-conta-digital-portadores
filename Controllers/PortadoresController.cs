@@ -11,16 +11,16 @@ namespace PortadoresService.Controllers
     [ApiController]
     public class PortadoresController : ControllerBase
     {
-        private readonly IPortadoresRepository _repository;
+        private readonly IPortadoresRepository _portadoresRepository;
         private readonly IMapper _mapper;
-        private readonly IContaDataClient _contaDataClient;
+        private readonly IContasServiceClient _contasServiceClient;
 
-        public PortadoresController(IPortadoresRepository repository, IMapper mapper,
-                IContaDataClient contaDataClient)
+        public PortadoresController(IPortadoresRepository portadoresRepository, IMapper mapper,
+                IContasServiceClient contasServiceClient)
         {
-            _repository = repository;
+            _portadoresRepository = portadoresRepository;
             _mapper = mapper;
-            _contaDataClient = contaDataClient;
+            _contasServiceClient = contasServiceClient;
         }
 
         [HttpPost]
@@ -28,16 +28,16 @@ namespace PortadoresService.Controllers
         {
             var portadorModel = _mapper.Map<Portador>(portadorCreateDto);
 
-            if (_repository.GetPortadorByCpf(portadorModel.Cpf) != null)
+            if (_portadoresRepository.GetPortadorByCpf(portadorModel.Cpf) != null)
             {
-                return Conflict("Ja existe portador com o cpf informado");
+                return Conflict("Cpf ja cadastrado");
             }
 
-            _repository.CreatePortador(portadorModel);
-            _repository.SaveChanges();
-
             var portadorReadDto = _mapper.Map<PortadorReadDto>(portadorModel);
-            await _contaDataClient.SendPortadorToConta(portadorReadDto);
+            await _contasServiceClient.CreatePortador(portadorReadDto);
+
+            _portadoresRepository.CreatePortador(portadorModel);
+            _portadoresRepository.SaveChanges();
 
             return CreatedAtRoute(nameof(GetPortadorByCpf), new { Cpf = portadorModel.Cpf }, _mapper.Map<PortadorReadDto>(portadorModel));
         }
@@ -45,18 +45,18 @@ namespace PortadoresService.Controllers
         [HttpDelete("{cpf}")]
         public async Task<ActionResult> DeletePortadorByCpf(string cpf)
         {
-            var portadorModel = _repository.GetPortadorByCpf(cpf);
+            var portadorModel = _portadoresRepository.GetPortadorByCpf(cpf);
 
             if (portadorModel == null)
             {
-                return NotFound();
+                return NotFound("Cpf nao cadastrado");
             }
 
             var portadorReadDto = _mapper.Map<PortadorReadDto>(portadorModel);
-            await _contaDataClient.DeletePortadorFromConta(portadorReadDto);
+            await _contasServiceClient.DeletePortadorByCpf(portadorModel.Cpf);
 
-            _repository.DeletePortador(portadorModel);
-            _repository.SaveChanges();
+            _portadoresRepository.DeletePortador(portadorModel);
+            _portadoresRepository.SaveChanges();
 
             return NoContent();
         }
@@ -64,21 +64,21 @@ namespace PortadoresService.Controllers
         [HttpGet("{cpf}", Name="GetPortadorByCpf")]
         public ActionResult<PortadorReadDto> GetPortadorByCpf(string cpf)
         {
-            var portador = _repository.GetPortadorByCpf(cpf);
+            var portadorModel = _portadoresRepository.GetPortadorByCpf(cpf);
 
-            if (portador == null)
+            if (portadorModel == null)
             {
                 return NotFound();
             }
 
-            return Ok(_mapper.Map<PortadorReadDto>(portador));
+            return Ok(_mapper.Map<PortadorReadDto>(portadorModel));
         }
 
         [HttpGet]
         public ActionResult<IEnumerable<PortadorReadDto>> GetPortadores()
         {
-            var portadores = _repository.GetPortadores();
-            return Ok(_mapper.Map<IEnumerable<PortadorReadDto>>(portadores));
+            var portadoresModels = _portadoresRepository.GetPortadores();
+            return Ok(_mapper.Map<IEnumerable<PortadorReadDto>>(portadoresModels));
         }
     }
 }
