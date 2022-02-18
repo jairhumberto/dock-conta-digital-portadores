@@ -68,7 +68,7 @@ namespace PortadoresService.Controllers
 
             if (portadorModel == null)
             {
-                return NotFound();
+                return NotFound("Cpf nao cadastrado");
             }
 
             return Ok(_mapper.Map<PortadorReadDto>(portadorModel));
